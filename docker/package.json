@@ -1,0 +1,22 @@
+{
+  "name": "wtf-backend",
+  "version": "1.0.0",
+  "description": "Node.js based back end for WTF",
+  "main": "wtfbackend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "child_process": "1.0.2",
+    "config": "^3.3.7",
+    "express": "4.17.1",
+    "glob": "7.1.7",
+    "mssql": "7.0.0",
+    "puppeteer": "^15.5.0",
+    "swagger-ui-express": "^4.5.0",
+    "yamljs": "^0.3.0"
+  },
+  "author": "Segi Hovav",
+  "license": "ISC"
+}

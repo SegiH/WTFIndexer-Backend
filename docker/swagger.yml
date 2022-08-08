@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+    title: WTF Backend
+    description: WTF Backend Backend API
+    version: 2.0.0
+servers:
+    - url: http://localhost:8080
+      description: WTF Backend API Dev
+tags:
+     - name: WTFEpisodes
+       description: List of all WTF episodes
+     - name: IMDB
+       description: DB with individual IMDB links
+paths:
+     /CheckInOut:
+          put:
+               tags:
+                    - WTFEpisodes
+               summary: Check an episode in or out
+               description: Check an episode in or out
+               parameters:
+                    - name: EpisodeNumber
+                      in: query
+                      description: Episode number
+                      required: true
+                      schema:
+                         type: integer
+                    - name: IsCheckedOut
+                      in: query
+                      description: true or false
+                      required: true
+                      schema:
+                         type: string
+               responses:
+                    '200':
+                         description: 'true on success, "error message" on error'
+     /GetEpisodes:
+          get:
+               tags:
+                    - WTFEpisodes
+               summary: Get all episodes
+               description: Get all episodes
+               parameters:
+                    - name: FavoritesOnly
+                      in: query
+                      description: Favorites only boolean value
+                      required: false
+                      schema:
+                         type: integer
+               responses:
+                    '200':
+                         description: 'JSON object with all episodes on success, ["ERROR","error message"] on error'
+     /GetEpisodeCheckInOutStatus:
+          get:
+               tags:
+                    - WTFEpisodes
+               summary: Get check in/out status for all episodes
+               description: Get check in/out status for all episodes
+     /GetIMDBNames:
+          get:
+               tags:
+                    - IMDB
+               summary: Get all IMDB links
+               description: Get all IMDB links
+               responses:
+                    '200':
+                         description: 'JSON object with all IMDB links'
+     /ScrapeData:
+          put:
+               tags:
+                    - WTFEpisodes
+               summary: Scrape WTF podcast page for new episode data
+               description: Scrape WTF podcast page for new episode data
+               parameters:
+                    - name: StartingEpisodeNum
+                      in: query
+                      description: First episode number to get
+                      required: true
+                      schema:
+                         type: integer
+               responses:
+                    '200':
+                         description: '"" on success, "error message" on error'
+     /UpdateEpisodes:
+          put:
+               tags:
+                    - WTFEpisodes
+               summary: Updates the name for a given episode
+               description: Updates the name for a given episode
+               parameters:
+                    - name: EpisodePayload
+                      in: query
+                      description: JSON payload of episode objects to update
+                      required: false
+                      schema:
+                         type: string
+               responses:
+                    '200':
+                         description: 'OK on success, "error message" on error'
+     /UpdateFavorites:
+          put:
+               tags:
+                    - Orders
+               summary: Updates the favorite for a given episode
+               description: Updates the favorite for a given episode
+               parameters:
+                    - name: FavoritesValue
+                      in: query
+                      description: Favorites only boolean value
+                      required: false
+                      schema:
+                         type: string
+               responses:
+                    '200':
+                         description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
+     /UpdateIMDB:
+          get:
+               tags:
+                    - IMDB
+               summary: Update IMDB link
+               description: Update IMDB link
+               parameters:
+                    - name: ID
+                      in: query
+                      description: ID of link to update
+                      required: false
+                      schema:
+                         type: integer
+                    - name: Name 
+                      in: query
+                      description: Name to update
+                      required: true
+                      schema:
+                         type: string
+                    - name: URL
+                      in: query
+                      description: URL to update
+                      required: true
+                      schema:
+                         type: string
+               responses:
+                    '200':
+                         description: 'OK on success, "error message" on error'
+components:
+     #securitySchemes:
+     #     bearerAuth:
+     #          type: http
+     #          scheme: bearer
+     #          bearerFormat: JWT
+     schemas:
+          WTFEpisodes:
+               required:
+                    - EpisodeID
+               properties:
+                    EpisodeID:
+                         type: integer
+                    EpisodeNumber:
+                         type: integer
+                    Name:
+                         type: string
+                    Description:
+                         type: string
+                    ReleaseDate:
+                         type: string
+                    Favorite:
+                         type: integer
+          IMDB:
+               required:
+                    - ID
+                    - Name
+                    
+                    - OrderNumber
+                    - OrderTime
+                    - OrderDate
+                    - D
+                    - E
+                    - V
+                    - C
+                    - Meta
+               properties:
+                    ID:
+                         type: integer
+                    Name:
+                         type: string
+                    IMDBURL:
+                         type: string
+#security: [
+#     { bearerAuth: [] }
+#]

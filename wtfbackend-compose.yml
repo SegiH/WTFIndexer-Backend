@@ -1,0 +1,19 @@
+version: '3.7'
+
+networks:
+    default:
+         name: YourNetworkName
+         external: true
+
+services:
+    WTFBackend:
+        container_name: WTFBackend
+        stdin_open: true
+        tty: true
+        image: wtf-backend:1.0
+        hostname: WTFBackend
+        volumes:
+            - /mnt/WTFPodcast/WTF with Marc Maron Podcast:/WTF # Optional if you want to check files in/out
+        networks: 
+            - default
+        restart: always

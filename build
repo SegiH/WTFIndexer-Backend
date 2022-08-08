@@ -1,0 +1,9 @@
+#!/bin/bash
+
+docker build docker/ -t wtf-backend:1.0
+
+docker stop WTFBackend && docker rm WTFBackend
+
+docker-compose -f wtfbackend-compose.yml up -d
+
+docker logs WTFBackend

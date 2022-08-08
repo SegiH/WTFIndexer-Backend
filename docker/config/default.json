@@ -1,0 +1,8 @@
+{
+     "DB":{
+          "Username": "WTFUser",
+          "Password": "YOURPASSWORD",
+          "Host": "YOURHOST",
+           "Database" : "WTF"
+     }
+}
