@@ -142,11 +142,11 @@ paths:
                     '200':
                          description: 'OK on success, "error message" on error'
 components:
-     #securitySchemes:
-     #     bearerAuth:
-     #          type: http
-     #          scheme: bearer
-     #          bearerFormat: JWT
+     securitySchemes:
+          bearerAuth:
+               type: http
+               scheme: bearer
+               bearerFormat: JWT
      schemas:
           WTFEpisodes:
                required:
@@ -184,6 +184,5 @@ components:
                          type: string
                     IMDBURL:
                          type: string
-#security: [
-#     { bearerAuth: [] }
-#]
+security:
+  - bearerAuth: []

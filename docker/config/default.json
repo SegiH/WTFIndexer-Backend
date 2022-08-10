@@ -4,5 +4,6 @@
           "Password": "YOURPASSWORD",
           "Host": "YOURHOST",
            "Database" : "WTF"
-     }
+     },
+	 "authorization": ""
 }

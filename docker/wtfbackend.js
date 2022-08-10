@@ -59,6 +59,23 @@ const pool = new sql.ConnectionPool(connectionParams);
 app.use(bodyParser.urlencoded({extended: false}));
 app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
+// Middleware that is called before any endpoint is reached
+app.use(function (req, res, next) {
+	 if (!config.has(`authorization`) || (config.has(`authorization`) && config.get(`authorization`) === "")) {
+		 res.status(403).send('Error! authorization is not set in app.config.json');
+		 res.end();
+	 } else {	 
+	      const AUTH_KEY=config.get(`authorization`);
+	 
+          const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
+   
+          if (bearerHeader === null || AUTH_KEY == null || (bearerHeader != null && bearerHeader != AUTH_KEY)) {
+               return res.status(403).send('Unauthorized');
+			   res.end();
+		  } else //Carry on with the request chain
+               next();
+	 }
+});
 //Default route doesn't need to return anything 
 app.get('/', (req, res) => {
      res.sendStatus(403);
