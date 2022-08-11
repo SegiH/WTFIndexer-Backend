@@ -6,6 +6,8 @@ info:
 servers:
     - url: http://localhost:8080
       description: WTF Backend API Dev
+    - url: https://wtf-backend.hovav.org
+      description: WTF Backend API Dev
 tags:
      - name: WTFEpisodes
        description: List of all WTF episodes
@@ -13,7 +15,7 @@ tags:
        description: DB with individual IMDB links
 paths:
      /CheckInOut:
-          put:
+          get:
                tags:
                     - WTFEpisodes
                summary: Check an episode in or out
@@ -114,7 +116,7 @@ paths:
                     '200':
                          description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
      /UpdateIMDB:
-          get:
+          put:
                tags:
                     - IMDB
                summary: Update IMDB link

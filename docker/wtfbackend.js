@@ -161,7 +161,7 @@ app.get('/GetIMDBNames', (req, res) => {
      execSQL(res,sql,{},true);
 });
 
-app.get('/ScrapeData', async (req, res) => {
+app.put('/ScrapeData', async (req, res) => {
 	 const startingEpisodeNum=(typeof req.query.StartingEpisodeNum !== 'undefined' ? req.query.StartingEpisodeNum : null);
 	 
 	 if (startingEpisodeNum === null) {
@@ -181,7 +181,7 @@ app.get('/ScrapeData', async (req, res) => {
 	 res.send(["OK",""]);
 });
 
-app.get('/UpdateEpisodes', (req, res) => {
+app.put('/UpdateEpisodes', (req, res) => {
      const episodeID=(typeof req.query.EpisodeID !== 'undefined' ? req.query.EpisodeID : null);
 	 const episodeNumber=(typeof req.query.EpisodeNum !== 'undefined' ? req.query.EpisodeNum : null);
 	 const name=(typeof req.query.Name !== 'undefined' ? req.query.Name : null);
@@ -234,7 +234,7 @@ app.get('/UpdateEpisodes', (req, res) => {
 	 execSQL(res,SQL,params);
 });
 
-app.get('/UpdateFavorite', (req, res) => {
+app.put('/UpdateFavorite', (req, res) => {
 	 const epNum=(typeof req.query.EpisodeNum !== 'undefined' ? req.query.EpisodeNum : null);
 	 const favoriteStatus=(typeof req.query.FavoriteValue !== 'undefined' && req.query.FavoriteValue === "true" ? 1 : 0);
 	 
@@ -247,7 +247,7 @@ app.get('/UpdateFavorite', (req, res) => {
      }
 });
 
-app.get('/UpdateIMDB', (req, res) => {
+app.put('/UpdateIMDB', (req, res) => {
      const ID=(typeof req.query.ID !== 'undefined' ? req.query.ID : null);
      const name=(typeof req.query.Name !== 'undefined' ? req.query.Name : null);
      const URL=(typeof req.query.URL !== 'undefined' ? req.query.URL : null);
