@@ -3,7 +3,7 @@
           "Username": "WTFUser",
           "Password": "YOURPASSWORD",
           "Host": "YOURHOST",
-           "Database" : "WTF"
+          "Database" : "WTF"
      },
 	 "authorization": ""
 }
