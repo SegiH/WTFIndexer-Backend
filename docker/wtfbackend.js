@@ -18,7 +18,6 @@ const yaml = require("yamljs");
 // Constants
 const PORT = 8080;
 const HOST = '0.0.0.0';
-const DEBUG = true;
 const WTFPATH = '/WTF/';
 const WTFARCHIVEPATH = '/WTF/Other/';
 const swaggerDocument = yaml.load("./swagger.yml");
@@ -45,16 +44,18 @@ var connectionParams = {
 const pool = new sql.ConnectionPool(connectionParams);
 
 // Validate DB connection
-(async () => {
-     try {
-          //const connection = await sql.connect(connectionParams);
-          await pool.connect();
-     } catch(err) {
-          const errorMsg=`An error occurred connecting to the database with the error ${err}`;
-          console.log(errorMsg);
-          process.exit(1);
-     }
-})();
+if (!debugging) {
+     (async () => {
+          try {
+               //const connection = await sql.connect(connectionParams);
+               await pool.connect();
+          } catch(err) {
+               const errorMsg=`An error occurred connecting to the database with the error ${err}`;
+               console.log(errorMsg);
+               process.exit(1);
+          }
+     })();
+}
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
