@@ -62,11 +62,11 @@ app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Middleware that is called before any endpoint is reached
 app.use(function (req, res, next) {
-	 if (!config.has(`authorization`) || (config.has(`authorization`) && config.get(`authorization`) === "")) {
+	 if (!config.has(`Authorization`) || (config.has(`Authorization`) && config.get(`Authorization`) === "")) {
 		 res.status(403).send('Error! authorization is not set in app.config.json');
 		 res.end();
 	 } else {	 
-	      const AUTH_KEY=config.get(`authorization`);
+	      const AUTH_KEY=config.get(`Authorization`);
 	 
           const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
    
