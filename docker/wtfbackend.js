@@ -148,9 +148,8 @@ app.get('/GetEpisodeCheckInOutStatus', (req, res) => {
      const request = pool.request();
    
      request.execute('GetEpisodeCheckInOutStatus', function(err, recordsets, returnValue) {
-        // ... error checks
-
-        res.send(recordsets.recordset);
+          // ... error checks
+          res.send(recordsets.recordset);
     });
 });
 
@@ -269,8 +268,6 @@ app.get('/UpdateIMDB', (req, res) => {
 
 async function execSQL(res, SQL, params, isQuery,returnData) {
      try {
-          //const pool = await sql.connect(connectionParams);
-
           let data = pool.request();
 
           for (let i=0;i<params.length;i++){
@@ -278,16 +275,14 @@ async function execSQL(res, SQL, params, isQuery,returnData) {
           }
 
           const result = await data.query(SQL);
-
-         // pool.close();
-
+		  
           if (isQuery)
-	       if (returnData)
-	            return result.recordset;
+	           if (returnData)
+	                return result.recordset;
                else
-		    res.send(result.recordset);
+		            res.send(result.recordset);
           else
-              res.send(["OK",""]);
+               res.send(["OK",""]);
      } catch(e) {
           console.log(`An error occurred executing the SQL ${SQL} with the error ${e} and the params ${params}`);
      }
@@ -299,7 +294,6 @@ async function scrapeEpisodes(startingEpisodeNum) {
      const page = await browser.newPage();
 
      await page.goto(URL);
-
 
      // This will allow the code block inside of page.evaluate() to get access to the value of startingEpisodeNum;
      await page.exposeFunction("getStartingEpisodeNum", function() {
@@ -363,7 +357,6 @@ async function scrapeEpisodes(startingEpisodeNum) {
 
      for (const episode of episodes) {
           await page.goto(episode.MoreLink);
-console.log(`Processing for ${episode.EpisodeNum} at the URL ${episode.MoreLink}`);
 
           const description = await page.evaluate(browser => {
                try {
@@ -382,7 +375,6 @@ console.log(`Processing for ${episode.EpisodeNum} at the URL ${episode.MoreLink}
           const downloadLink = await page.evaluate(browser => {
                try { 
                     const items = document.querySelectorAll(".entry-content");
-    console.log("entry-content length=" + items.length);
 
                     if (items.length === 1) { 
                          const entryDownloadLink=items[0].querySelector(".sqs-audio-embed").getAttribute('data-url');
