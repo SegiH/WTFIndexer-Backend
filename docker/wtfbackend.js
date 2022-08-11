@@ -21,7 +21,7 @@ const HOST = '0.0.0.0';
 const WTFPATH = '/WTF/';
 const WTFARCHIVEPATH = '/WTF/Other/';
 const swaggerDocument = yaml.load("./swagger.yml");
-const debugging=true; // Set to true to see console.log messages
+const debugging=false; // Set to true to see console.log messages
 
 if (!config.has("DB.Username") || !config.has("DB.Password") || !config.has("DB.Host") || !config.has("DB.Database")) {
      console.log("Error! One or more of the database connection parameters is missing. Check config/default.json");
@@ -69,7 +69,7 @@ app.use(function (req, res, next) {
 	      const AUTH_KEY=config.get(`Authorization`);
 	 
           const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
-   
+
           if (bearerHeader === null || AUTH_KEY == null || (bearerHeader != null && bearerHeader != AUTH_KEY)) {
                return res.status(403).send('Unauthorized');
 			   res.end();
@@ -77,6 +77,7 @@ app.use(function (req, res, next) {
                next();
 	 }
 });
+
 //Default route doesn't need to return anything 
 app.get('/', (req, res) => {
      res.sendStatus(403);
