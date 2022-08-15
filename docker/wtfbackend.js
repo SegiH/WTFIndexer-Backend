@@ -13,14 +13,15 @@ const puppeteer = require('puppeteer');
 const sql = require('mssql');
 const swaggerUI = require("swagger-ui-express");
 const url = require('url');
-const yaml = require("yamljs");
+//const yaml = require("yamljs");
+const swaggerJSDoc = require('swagger-jsdoc');
 
 // Constants
-const PORT = 8080;
+const PORT = 8000;
 const HOST = '0.0.0.0';
 const WTFPATH = '/WTF/';
 const WTFARCHIVEPATH = '/WTF/Other/';
-const swaggerDocument = yaml.load("./swagger.yml");
+//const swaggerDocument = yaml.load("./swagger.yml");
 const debugging=false; // Set to true to see console.log messages
 
 if (!config.has("DB.Username") || !config.has("DB.Password") || !config.has("DB.Host") || !config.has("DB.Database")) {
@@ -58,14 +59,102 @@ if (!debugging) {
 }
 
 app.use(bodyParser.urlencoded({extended: false}));
-app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+
+// Swagger definition
+const swaggerOptions = {  
+    swaggerDefinition: {
+		openapi: '3.0.1',
+        info: {  
+            title:'WTF Backend',
+            description: 'WTF Backend',
+            version:'2.0.0'  
+        },
+		components: {
+			schemas: {
+				WTFEpisodes: {
+					required: [
+						"EpisodeID"
+					],
+					properties: {
+						EpisodeID: {
+							type: "integer"
+						},
+						EpisodeNumber: {
+							type: "integer"
+						},
+						Name: {
+							type: "string"
+						},
+						Description: {
+							type: "string"
+						},
+						ReleaseDate: {
+							type: "string"
+						},
+						Favorite: {
+							type: "integer"
+						}
+					}
+				},
+				IMDB: {
+					required: [
+						"ID",
+						"Name"
+					],
+					properties: {
+						ID: {
+							type: "integer"
+						},
+						Name: {
+							type: "string"
+						}
+					}
+				}
+			},
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                }
+            }
+        },
+        security: [{
+          bearerAuth: []
+        }],
+		servers: [
+        {
+             url: 'http://localhost:8000',
+             description: 'Development server',
+        },
+		{
+             url: 'https://wtf-backend.hovav.org',
+             description: 'Development server',
+        },
+        ],
+		tags: [
+		{
+			name: 'WTFEpisodes',
+			description: 'List of all WTF episodes'
+		},
+		{
+			name: 'IMDB',
+			description: 'DB with individual IMDB links'
+		}
+		]
+    },  
+    apis:['wtfbackend.js'],  
+}
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Middleware that is called before any endpoint is reached
 app.use(function (req, res, next) {
 	 if (!config.has(`Authorization`) || (config.has(`Authorization`) && config.get(`Authorization`) === "")) {
 		 res.status(403).send('Error! authorization is not set in app.config.json');
 		 res.end();
-	 } else {	 
+	 } else {
 	      const AUTH_KEY=config.get(`Authorization`);
 	 
           const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
@@ -83,6 +172,32 @@ app.get('/', (req, res) => {
      res.sendStatus(403);
 });
 
+/** 
+ * @swagger 
+ * /CheckInOut: 
+ *    get:
+ *        tags: 
+ *          - WTFEpisodes
+ *        summary: Check an episode in or out
+ *        description: Check an episode in or out
+ *        parameters:
+ *           - name: EpisodeNumber
+ *             in: query
+ *             description: Episode Number
+ *             required: true
+ *             schema:
+ *                  type: integer
+ *           - name: IsCheckedOut
+ *             in: query
+ *             description: true or false
+ *             required: true
+ *             schema:
+ *                  type: string
+ *        responses:  
+ *          200: 
+ *            description: '["OK",CHECKOUT_STATUS] on success where CHECKOUT_STATUS is true or false, ["ERROR","error message"] on error'
+ *   
+ */
 app.get('/CheckInOut', (req, res) => {
      const episodeNumber=(typeof req.query.EpisodeNum !== 'undefined' ? req.query.EpisodeNum : null);
 
@@ -131,6 +246,26 @@ app.get('/CheckInOut', (req, res) => {
      });
 });
 
+/** 
+ * @swagger 
+ * /GetEpisodes: 
+ *    get:
+ *        tags: 
+ *          - WTFEpisodes
+ *        summary: Get all episodes
+ *        description: Get all episodes
+ *        parameters:
+ *           - name: FavoritesOnly
+ *             in: query
+ *             description: Favorites only boolean value
+ *             required: false
+ *             schema:
+ *                  type: integer
+ *        responses:  
+ *          200: 
+ *            description: 'JSON object with all episodes on success, ["ERROR","error message"] on error'
+ *   
+ */
 app.get('/GetEpisodes', (req, res) => {
      const favoritesOnly=(typeof req.query.FavoritesOnly !== 'undefined' ? req.query.FavoritesOnly : null);
 
@@ -146,6 +281,19 @@ app.get('/GetEpisodes', (req, res) => {
      execSQL(res,sql,{},true);
 });
 
+/** 
+ * @swagger 
+ * /GetEpisodeCheckInOutStatus: 
+ *    get:
+ *        tags: 
+ *          - WTFEpisodes
+ *        summary: Get check in/out status for all episodes
+ *        description: Get check in/out status for all episodes
+ *        responses:  
+ *          200: 
+ *            description: 'JSON object with all episode numbers and checkout status for each on success, ["ERROR","error message"] on error'
+ *   
+ */
 app.get('/GetEpisodeCheckInOutStatus', (req, res) => {
      const request = pool.request();
    
@@ -155,12 +303,38 @@ app.get('/GetEpisodeCheckInOutStatus', (req, res) => {
     });
 });
 
+/** 
+ * @swagger 
+ * /GetIMDBNames: 
+ *    get:
+ *        tags: 
+ *          - IMDB
+ *        summary: Get all IMDB links
+ *        description: Get all IMDB links
+ *        responses:  
+ *          200: 
+ *            description: 'JSON object with all IMDB links'
+ *   
+ */
 app.get('/GetIMDBNames', (req, res) => {
      const sql=`SELECT * FROM IMDB ORDER BY Name`;
 
      execSQL(res,sql,{},true);
 });
 
+/** 
+ * @swagger 
+ * /ScrapeData: 
+ *    get:
+ *        tags: 
+ *          - IMDB
+ *        summary: Scrape WTF podcast page for new episode data
+ *        description: Scrape WTF podcast page for new episode data
+ *        responses:  
+ *          200: 
+ *            description: '"" on success, "error message" on error'
+ *   
+ */
 app.put('/ScrapeData', async (req, res) => {
 	 const startingEpisodeNum=(typeof req.query.StartingEpisodeNum !== 'undefined' ? req.query.StartingEpisodeNum : null);
 	 
@@ -181,6 +355,56 @@ app.put('/ScrapeData', async (req, res) => {
 	 res.send(["OK",""]);
 });
 
+/** 
+ * @swagger 
+ * /UpdateEpisodes: 
+ *    get:
+ *        tags: 
+ *          - WTFEpisodes
+ *        summary: Updates the name for a given episode
+ *        description: Updates the name for a given episode
+ *        parameters:
+ *           - name: EpisodeID
+ *             in: query
+ *             description: Episode ID
+ *             required: true
+ *             schema:
+ *                  type: integer
+ *           - name: EpisodeNum
+ *             in: query
+ *             description: Episode Num
+ *             required: false
+ *             schema:
+ *                  type: integer
+ *           - name: Name
+ *             in: query
+ *             description: Name
+ *             required: false
+ *             schema:
+ *                  type: string
+ *           - name: Description
+ *             in: query
+ *             description: Description
+ *             required: false
+ *             schema:
+ *                  type: string
+ *           - name: ReleaseDate
+ *             in: query
+ *             description: Release Date
+ *             required: false
+ *             schema:
+ *                  type: string
+ *           - name: Favorite
+ *             in: query
+ *             description: Favorite
+ *             required: false
+ *             schema:
+ *                  type: string
+ *        responses:  
+ *          200: 
+ *            description: '"" on success, "error message" on error'
+ *   
+ */
 app.put('/UpdateEpisodes', (req, res) => {
      const episodeID=(typeof req.query.EpisodeID !== 'undefined' ? req.query.EpisodeID : null);
 	 const episodeNumber=(typeof req.query.EpisodeNum !== 'undefined' ? req.query.EpisodeNum : null);
@@ -234,6 +458,26 @@ app.put('/UpdateEpisodes', (req, res) => {
 	 execSQL(res,SQL,params);
 });
 
+/** 
+ * @swagger 
+ * /UpdateFavorite: 
+ *    get:
+ *        tags: 
+ *          - WTFEpisodes
+ *        summary: Updates the favorite for a given episode
+ *        description: Updates the favorite for a given episode
+ *        parameters:
+ *           - name: FavoritesValue
+ *             in: query
+ *             description: Favorites only boolean value
+ *             required: false
+ *             schema:
+ *                  type: string
+ *        responses:  
+ *          200: 
+ *            description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
+ *   
+ */
 app.put('/UpdateFavorite', (req, res) => {
 	 const epNum=(typeof req.query.EpisodeNum !== 'undefined' ? req.query.EpisodeNum : null);
 	 const favoriteStatus=(typeof req.query.FavoriteValue !== 'undefined' && req.query.FavoriteValue === "true" ? 1 : 0);
@@ -247,6 +491,38 @@ app.put('/UpdateFavorite', (req, res) => {
      }
 });
 
+/** 
+ * @swagger 
+ * /UpdateIMDB: 
+ *    get:
+ *        tags: 
+ *          - IMDB
+ *        summary: Update IMDB link
+ *        description: Update IMDB link
+ *        parameters:
+ *           - name: ID
+ *             in: query
+ *             description: ID of link to update
+ *             required: false
+ *             schema:
+ *                  type: integer
+ *           - name: Name
+ *             in: query
+ *             description: Name to update
+ *             required: true
+ *             schema:
+ *                  type: string
+ *           - name: URL
+ *             in: query
+ *             description: URL update
+ *             required: true
+ *             schema:
+ *                  type: string
+ *        responses:  
+ *          200: 
+ *            description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
+ *   
+ */
 app.put('/UpdateIMDB', (req, res) => {
      const ID=(typeof req.query.ID !== 'undefined' ? req.query.ID : null);
      const name=(typeof req.query.Name !== 'undefined' ? req.query.Name : null);
