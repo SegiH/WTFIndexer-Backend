@@ -2,7 +2,6 @@ FROM node:14
 
 RUN mkdir -p /config
 COPY wtfbackend.js /
-COPY swagger.yml /
 COPY package.json /
 COPY config/default.json /config
 
