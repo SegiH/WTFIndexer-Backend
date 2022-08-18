@@ -124,7 +124,7 @@ const swaggerOptions = {
         }],
 		servers: [
         {
-             url: 'http://localhost:8000',
+             url: 'http://localhost:8080',
              description: 'Development server',
         },
 		{
@@ -402,7 +402,7 @@ app.put('/ScrapeData', async (req, res) => {
  *                  type: string
  *        responses:  
  *          200: 
- *            description: '"" on success, "error message" on error'
+ *            description: '["OK",""] on success, ["ERROR","error message"] on error'
  *   
  */
 app.put('/UpdateEpisodes', (req, res) => {
@@ -475,7 +475,7 @@ app.put('/UpdateEpisodes', (req, res) => {
  *                  type: string
  *        responses:  
  *          200: 
- *            description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
+ *            description: '["OK",""] on success, ["ERROR","error message"] on error'
  *   
  */
 app.put('/UpdateFavorite', (req, res) => {
@@ -520,7 +520,7 @@ app.put('/UpdateFavorite', (req, res) => {
  *                  type: string
  *        responses:  
  *          200: 
- *            description: 'Returns orders that match specified criteria or ["ERROR","error message"] on error'
+ *            description: '["OK",""] on success, ["ERROR","error message"] on error'
  *   
  */
 app.put('/UpdateIMDB', (req, res) => {
@@ -538,10 +538,10 @@ app.put('/UpdateIMDB', (req, res) => {
           return;
      }
 
-     const params=[['Name',sql.VarChar,name],['URL',sql.VarChar,URL],['ID',sql.Int,ID]];
-     const SQL=`IF (SELECT COUNT(*) FROM IMDB WHERE IMDBURL=@URL) = 0 INSERT INTO IMDB(Name,IMDBURL) VALUES (@Name,@URL); ELSE UPDATE IMDB SET Name=@Name,IMDBURL=@URL WHERE ID=@ID`;
+     const params=[['Name',sql.VarChar,name],['URL',sql.VarChar,URL],['IMDBID',sql.Int,ID]];
+     const SQL=(ID === null ? `IF (SELECT COUNT(*) FROM IMDB WHERE IMDBURL=@URL) = 0 INSERT INTO IMDB(Name,IMDBURL) VALUES (@Name,@URL);` : `UPDATE IMDB SET Name=@Name,IMDBURL=@URL WHERE IMDBID=@IMDBID`);
  
-     execSQL(res,SQL,params);
+     execSQL(res,SQL,params,false);
 });
 
 async function execSQL(res, SQL, params, isQuery,returnData) {
