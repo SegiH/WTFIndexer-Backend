@@ -17,7 +17,7 @@ const url = require('url');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // Constants
-const PORT = 8000;
+const PORT = 8080;
 const HOST = '0.0.0.0';
 const WTFPATH = '/WTF/';
 const WTFARCHIVEPATH = '/WTF/Other/';
@@ -325,7 +325,7 @@ app.get('/GetIMDBNames', (req, res) => {
 /** 
  * @swagger 
  * /ScrapeData: 
- *    get:
+ *    put:
  *        tags: 
  *          - IMDB
  *        summary: Scrape WTF podcast page for new episode data
@@ -358,7 +358,7 @@ app.put('/ScrapeData', async (req, res) => {
 /** 
  * @swagger 
  * /UpdateEpisodes: 
- *    get:
+ *    put:
  *        tags: 
  *          - WTFEpisodes
  *        summary: Updates the name for a given episode
@@ -461,7 +461,7 @@ app.put('/UpdateEpisodes', (req, res) => {
 /** 
  * @swagger 
  * /UpdateFavorite: 
- *    get:
+ *    put:
  *        tags: 
  *          - WTFEpisodes
  *        summary: Updates the favorite for a given episode
@@ -494,7 +494,7 @@ app.put('/UpdateFavorite', (req, res) => {
 /** 
  * @swagger 
  * /UpdateIMDB: 
- *    get:
+ *    put:
  *        tags: 
  *          - IMDB
  *        summary: Update IMDB link
