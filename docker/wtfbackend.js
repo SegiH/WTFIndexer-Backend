@@ -4,6 +4,7 @@
 
 const bodyParser = require("body-parser");
 const config = require("config");
+const cors = require("cors");
 const express = require('express');
 const app = express();
 const exec = require('child_process').exec;
@@ -59,6 +60,7 @@ if (!debugging) {
 }
 
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(cors());
 
 // Swagger definition
 const swaggerOptions = {  
@@ -261,6 +263,12 @@ app.get('/CheckInOut', (req, res) => {
  *             required: false
  *             schema:
  *                  type: integer
+ *           - name: RecordCount
+ *             in: query
+ *             description: Limits how many records are retrieved. Defaults to 50 if not provided
+ *             required: false
+ *             schema:
+ *                  type: integer
  *        responses:  
  *          200: 
  *            description: 'JSON object with all episodes on success, ["ERROR","error message"] on error'
@@ -268,6 +276,7 @@ app.get('/CheckInOut', (req, res) => {
  */
 app.get('/GetEpisodes', (req, res) => {
      const favoritesOnly=(typeof req.query.FavoritesOnly !== 'undefined' ? req.query.FavoritesOnly : null);
+     const recordCount=(typeof req.query.RecordCount !== 'undefined' ? req.query.RecordCount : 50);
 
      if (favoritesOnly !== null && favoritesOnly !== "0" && favoritesOnly !== "1") {
           res.send(["ERROR","Favorites must be 0 or 1"]);
@@ -276,7 +285,14 @@ app.get('/GetEpisodes', (req, res) => {
 
      const favoriteValue=parseInt(favoritesOnly);
 
-     const sql=`SELECT *,dbo.ParseNames(Name) AS IMDBLink FROM WTFEpisodes ${(favoritesOnly !== null ? `WHERE Favorite=${favoriteValue}` : ``)} ORDER BY EpisodeID DESC`;
+     try {
+          parseInt(recordCount);
+     } catch(e) {
+          res.send(["ERROR","RecordLimit must be a number"]);
+          return;
+     }
+
+     const sql=`SELECT TOP(${recordCount}) *,dbo.ParseNames(Name) AS IMDBLink FROM WTFEpisodes ${(favoritesOnly !== null ? `WHERE Favorite=${favoriteValue}` : ``)} ORDER BY EpisodeID DESC`;
 
      execSQL(res,sql,{},true);
 });
