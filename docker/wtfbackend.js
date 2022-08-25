@@ -153,25 +153,75 @@ app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Middleware that is called before any endpoint is reached
 app.use(function (req, res, next) {
-	 if (!config.has(`Authorization`) || (config.has(`Authorization`) && config.get(`Authorization`) === "")) {
-		 res.status(403).send('Error! authorization is not set in app.config.json');
-		 res.end();
-	 } else {
+          console.log(req.url);
+
+          if (req.url.startsWith("/AddIMDB"))
+               next();
+	  else if (!config.has(`Authorization`) || (config.has(`Authorization`) && config.get(`Authorization`) === "")) {
+	       res.status(403).send('Error! authorization is not set in app.config.json');
+	       res.end();
+	  } else {
 	      const AUTH_KEY=config.get(`Authorization`);
 	 
-          const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
+              const bearerHeader=(typeof req.headers['authorization'] !== 'undefined' ? req.headers['authorization'].replace("Bearer ","") : null);
 
-          if (bearerHeader === null || AUTH_KEY == null || (bearerHeader != null && bearerHeader != AUTH_KEY)) {
-               return res.status(403).send('Unauthorized');
-			   res.end();
-		  } else //Carry on with the request chain
-               next();
+              if (bearerHeader === null || AUTH_KEY == null || (bearerHeader != null && bearerHeader != AUTH_KEY)) {
+                   return res.status(403).send('Unauthorized');
+	           res.end();
+	      } else //Carry on with the request chain
+                   next();
 	 }
 });
 
 //Default route doesn't need to return anything 
 app.get('/', (req, res) => {
      res.sendStatus(403);
+});
+
+/** 
+ * @swagger 
+ * /AddIMDB: 
+ *    get:
+ *        tags: 
+ *          - IMDB
+ *        summary: Add IMDB link
+ *        description: Adde IMDB link
+ *        parameters:
+ *           - name: Name
+ *             in: query
+ *             description: Name to add
+ *             required: true
+ *             schema:
+ *                  type: string
+ *           - name: URL
+ *             in: query
+ *             description: URL add
+ *             required: true
+ *             schema:
+ *                  type: string
+ *        responses:  
+ *          200: 
+ *            description: '["OK",""] on success, ["ERROR","error message"] on error'
+ *   
+ */
+app.get('/AddIMDB', (req, res) => {
+     const name=(typeof req.query.Name !== 'undefined' ? req.query.Name : null);
+     const URL=(typeof req.query.URL !== 'undefined' ? req.query.URL : null);
+
+     if (name === null) {
+          res.send(["ERROR","Name was not provided"]);
+          return;
+     }
+
+     if (URL === null) {
+          res.send(["ERROR","URL was not provided"]);
+          return;
+     }
+
+     const params=[['Name',sql.VarChar,name],['URL',sql.VarChar,URL],['IMDBID',sql.Int,ID]];
+     const SQL=`IF (SELECT COUNT(*) FROM IMDB WHERE IMDBURL=@URL) = 0 INSERT INTO IMDB(Name,IMDBURL) VALUES (@Name,@URL);`;
+ 
+     execSQL(res,SQL,params,false);
 });
 
 /** 
