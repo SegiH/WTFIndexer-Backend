@@ -218,7 +218,7 @@ app.get('/AddIMDB', (req, res) => {
           return;
      }
 
-     const params=[['Name',sql.VarChar,name],['URL',sql.VarChar,URL],['IMDBID',sql.Int,ID]];
+     const params=[['Name',sql.VarChar,name],['URL',sql.VarChar,URL]];
      const SQL=`IF (SELECT COUNT(*) FROM IMDB WHERE IMDBURL=@URL) = 0 INSERT INTO IMDB(Name,IMDBURL) VALUES (@Name,@URL);`;
  
      execSQL(res,SQL,params,false);
